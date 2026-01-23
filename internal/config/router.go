@@ -6,6 +6,7 @@ import (
 	"net"
 	"net/http"
 
+	"github.com/bencoronard/demo-go-bff-web/internal/token"
 	xhttp "github.com/bencoronard/demo-go-common-libs/http"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -14,12 +15,14 @@ import (
 type router struct {
 	port int
 	e    *echo.Echo
+	h    *token.TokenHandler
 }
 
-func NewRouter(p *Properties) xhttp.Router {
+func NewRouter(h *token.TokenHandler, p *Properties) xhttp.Router {
 	return &router{
 		port: p.Env.App.ListenPort,
 		e:    echo.New(),
+		h:    h,
 	}
 }
 
@@ -46,9 +49,7 @@ func (r *router) RegisterMiddlewares() {
 
 func (r *router) RegisterRoutes() {
 	api := r.e.Group("/api", middleware.RequestLogger())
-	api.GET("", func(c echo.Context) error {
-		return c.NoContent(http.StatusTeapot)
-	})
+	api.GET("/token", r.h.GenerateToken)
 
 	act := r.e.Group("/actuator")
 	act.GET("/health", func(c echo.Context) error { return c.JSON(http.StatusOK, map[string]string{"status": "up"}) })

@@ -2,7 +2,6 @@ package config
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/bencoronard/demo-go-common-libs/vault"
@@ -19,11 +18,10 @@ type envCfg struct {
 	App   appCfg
 	Vault vaultCfg
 	OTEL  otelCfg
-	CP    cpCfg
 }
 
 type secretCfg struct {
-	DB dbCfg `mapstructure:",squash"`
+	Crypto cryptoCfg `mapstructure:",squash"`
 }
 
 func NewProperties(lc fx.Lifecycle) (*Properties, error) {
@@ -41,7 +39,7 @@ func NewProperties(lc fx.Lifecycle) (*Properties, error) {
 	defer cancel()
 
 	var s secretCfg
-	if err := vc.ReadSecret(ctx, fmt.Sprintf("secret/application/%s", e.App.Environment), &s); err != nil {
+	if err := vc.ReadSecret(ctx, "secret/bff-web", &s); err != nil {
 		return nil, err
 	}
 
@@ -52,9 +50,8 @@ func NewProperties(lc fx.Lifecycle) (*Properties, error) {
 }
 
 type appCfg struct {
-	ListenPort    int    `env:"APP_LISTEN_PORT"`
-	Environment   string `env:"APP_ENVIRONMENT"`
-	PublicKeyPath string `env:"APP_PUBLIC_KEY_PATH"`
+	ListenPort  int    `env:"APP_LISTEN_PORT"`
+	Environment string `env:"APP_ENVIRONMENT"`
 }
 
 type vaultCfg struct {
@@ -70,18 +67,6 @@ type otelCfg struct {
 	TracesSamplingProbability float64 `env:"OTEL_TRACES_SAMPLING_PROBABILITY"`
 }
 
-type cpCfg struct {
-	ConnectionPoolCap         int `env:"CRUD_API_DB_CP_CAP"`
-	ConnectionPoolIdleMin     int `env:"CRUD_API_DB_CP_IDLE_MIN"`
-	ConnectionPoolIdleTimeout int `env:"CRUD_API_DB_CP_IDLE_TIMEOUT"`
-	ConnectionTimeout         int `env:"CRUD_API_DB_CP_CONN_TIMEOUT"`
-	ConnectionTTL             int `env:"CRUD_API_DB_CP_CONN_TTL"`
-}
-
-type dbCfg struct {
-	Host string `mapstructure:"pg.host"`
-	Port string `mapstructure:"pg.port"`
-	Name string `mapstructure:"pg.dbname"`
-	User string `mapstructure:"pg.user"`
-	Pass string `mapstructure:"pg.pass"`
+type cryptoCfg struct {
+	PrivateKey string `mapstructure:"private.key"`
 }
