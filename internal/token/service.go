@@ -20,5 +20,5 @@ func NewTokenService(iss jwt.Issuer) tokenService {
 }
 
 func (t *tokenServiceImpl) issueToken(ctx context.Context) (string, error) {
-	return t.iss.IssueToken("crud-api-consumer", nil, nil, 300*time.Second, time.Time{})
+	return t.iss.IssueToken("1", nil, nil, 300*time.Second, time.Time{})
 }
