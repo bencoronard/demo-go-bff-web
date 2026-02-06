@@ -1,11 +1,11 @@
 module github.com/bencoronard/demo-go-bff-web
 
-go 1.26
+go 1.25
 
 replace github.com/bencoronard/demo-go-common-libs => ../demo-go-common-libs
 
 require (
-	github.com/bencoronard/demo-go-common-libs v0.0.0-20260123143759-327ce09862cd
+	github.com/bencoronard/demo-go-common-libs v0.0.0-20260206025353-dd0adf8ba855
 	github.com/caarlos0/env/v11 v11.3.1
 	github.com/labstack/echo/v4 v4.15.0
 	go.uber.org/fx v1.24.0
@@ -14,7 +14,7 @@ require (
 require (
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/go-jose/go-jose/v4 v4.1.3 // indirect
-	github.com/golang-jwt/jwt/v5 v5.3.0 // indirect
+	github.com/golang-jwt/jwt/v5 v5.3.1 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
