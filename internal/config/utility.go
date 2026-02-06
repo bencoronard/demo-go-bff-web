@@ -17,7 +17,7 @@ func NewJwtIssuer(p *Properties) (xjwt.Issuer, error) {
 
 	key, err := x509.ParsePKCS8PrivateKey(block.Bytes)
 	if err != nil {
-		return nil, errors.New("failed to parse private key")
+		return nil, err
 	}
 
 	rsaKey, ok := key.(*rsa.PrivateKey)
