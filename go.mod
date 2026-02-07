@@ -5,7 +5,7 @@ go 1.25
 replace github.com/bencoronard/demo-go-common-libs => ../demo-go-common-libs
 
 require (
-	github.com/bencoronard/demo-go-common-libs v0.0.0-20260206025353-dd0adf8ba855
+	github.com/bencoronard/demo-go-common-libs v0.0.0-20260207030951-1cf1ab1051d3
 	github.com/caarlos0/env/v11 v11.3.1
 	github.com/labstack/echo/v4 v4.15.0
 	go.uber.org/fx v1.24.0
@@ -33,7 +33,7 @@ require (
 	github.com/hashicorp/vault/api/auth/userpass v0.11.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
-	github.com/jackc/pgx/v5 v5.6.0 // indirect
+	github.com/jackc/pgx/v5 v5.8.0 // indirect
 	github.com/jackc/puddle/v2 v2.2.2 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
