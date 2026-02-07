@@ -2,6 +2,7 @@ package config
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/bencoronard/demo-go-common-libs/vault"
@@ -18,9 +19,11 @@ type envCfg struct {
 	App   appCfg
 	Vault vaultCfg
 	OTEL  otelCfg
+	CP    cpCfg
 }
 
 type secretCfg struct {
+	DB     dbCfg     `mapstructure:",squash"`
 	Crypto cryptoCfg `mapstructure:",squash"`
 }
 
@@ -40,6 +43,9 @@ func NewProperties(lc fx.Lifecycle) (*Properties, error) {
 
 	var s secretCfg
 	if err := vc.ReadSecret(ctx, "secret/bff-web", &s); err != nil {
+		return nil, err
+	}
+	if err := vc.ReadSecret(ctx, fmt.Sprintf("secret/application/%s", e.App.Environment), &s); err != nil {
 		return nil, err
 	}
 
@@ -65,6 +71,22 @@ type otelCfg struct {
 	LogsEndpoint              string  `env:"OTEL_COL_LOGS_ENDPOINT"`
 	MetricsSamplingFreqInMin  string  `env:"OTEL_METRICS_SAMPLING_FREQ_IN_MIN"`
 	TracesSamplingProbability float64 `env:"OTEL_TRACES_SAMPLING_PROBABILITY"`
+}
+
+type cpCfg struct {
+	ConnectionPoolCap         int `env:"BFF_WEB_DB_CP_CAP"`
+	ConnectionPoolIdleMin     int `env:"BFF_WEB_DB_CP_IDLE_MIN"`
+	ConnectionPoolIdleTimeout int `env:"BFF_WEB_DB_CP_IDLE_TIMEOUT"`
+	ConnectionTimeout         int `env:"BFF_WEB_DB_CP_CONN_TIMEOUT"`
+	ConnectionTTL             int `env:"BFF_WEB_DB_CP_CONN_TTL"`
+}
+
+type dbCfg struct {
+	Host string `mapstructure:"pg.host"`
+	Port string `mapstructure:"pg.port"`
+	Name string `mapstructure:"pg.dbname"`
+	User string `mapstructure:"pg.user"`
+	Pass string `mapstructure:"pg.pass"`
 }
 
 type cryptoCfg struct {
