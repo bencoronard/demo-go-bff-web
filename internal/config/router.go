@@ -1,15 +1,12 @@
 package config
 
 import (
-	"context"
-	"fmt"
-	"net"
 	"net/http"
 
 	"github.com/bencoronard/demo-go-bff-web/internal/token"
 	xhttp "github.com/bencoronard/demo-go-common-libs/http"
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	"github.com/labstack/echo/v5"
+	"github.com/labstack/echo/v5/middleware"
 )
 
 type router struct {
@@ -18,29 +15,22 @@ type router struct {
 	h    *token.TokenHandler
 }
 
-func NewRouter(h *token.TokenHandler, p *Properties) xhttp.Router {
+func NewRouter(p *Properties, h *token.TokenHandler) xhttp.Router {
+	e := echo.New()
+	e.HTTPErrorHandler = xhttp.GlobalErrorHandler(nil)
 	return &router{
 		port: p.Env.App.ListenPort,
-		e:    echo.New(),
+		e:    e,
 		h:    h,
 	}
 }
 
-func (r *router) ListeningPort() int {
+func (r *router) Port() int {
 	return r.port
 }
 
-func (r *router) Listen(port int) (net.Listener, error) {
-	addr := fmt.Sprintf(":%d", port)
-	return net.Listen("tcp", addr)
-}
-
-func (r *router) Serve(l net.Listener) error {
-	return r.e.Server.Serve(l)
-}
-
-func (r *router) Shutdown(ctx context.Context) error {
-	return r.e.Shutdown(ctx)
+func (r *router) Handler() http.Handler {
+	return r.e
 }
 
 func (r *router) RegisterMiddlewares() {
@@ -52,6 +42,6 @@ func (r *router) RegisterRoutes() {
 	api.GET("/token", r.h.GenerateToken)
 
 	act := r.e.Group("/actuator")
-	act.GET("/health", func(c echo.Context) error { return c.JSON(http.StatusOK, map[string]string{"status": "up"}) })
-	act.GET("/readiness", func(c echo.Context) error { return c.JSON(http.StatusOK, map[string]string{"status": "ready"}) })
+	act.GET("/health", func(c *echo.Context) error { return c.JSON(http.StatusOK, map[string]string{"status": "up"}) })
+	act.GET("/readiness", func(c *echo.Context) error { return c.JSON(http.StatusOK, map[string]string{"status": "ready"}) })
 }
