@@ -2,7 +2,7 @@ module github.com/bencoronard/demo-go-bff-web
 
 go 1.26
 
-// replace github.com/bencoronard/demo-go-common-libs => ../demo-go-common-libs
+replace github.com/bencoronard/demo-go-common-libs => ../demo-go-common-libs
 
 require (
 	github.com/bencoronard/demo-go-common-libs v0.0.0-20260211135426-8a7815245027
