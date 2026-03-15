@@ -5,8 +5,8 @@ go 1.26
 replace github.com/bencoronard/demo-go-common-libs => ../demo-go-common-libs
 
 require (
-	github.com/bencoronard/demo-go-common-libs v0.0.0-20260217134650-edb6a7a376c4
-	github.com/caarlos0/env/v11 v11.3.1
+	github.com/bencoronard/demo-go-common-libs v0.0.0-20260314163857-be0b57439ff3
+	github.com/caarlos0/env/v11 v11.4.0
 	github.com/labstack/echo/v5 v5.0.4
 	go.uber.org/fx v1.24.0
 	gorm.io/driver/postgres v1.6.0
@@ -43,9 +43,9 @@ require (
 	go.uber.org/dig v1.19.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.27.1 // indirect
-	golang.org/x/net v0.50.0 // indirect
-	golang.org/x/sync v0.19.0 // indirect
-	golang.org/x/sys v0.41.0 // indirect
-	golang.org/x/text v0.34.0 // indirect
-	golang.org/x/time v0.14.0 // indirect
+	golang.org/x/net v0.52.0 // indirect
+	golang.org/x/sync v0.20.0 // indirect
+	golang.org/x/sys v0.42.0 // indirect
+	golang.org/x/text v0.35.0 // indirect
+	golang.org/x/time v0.15.0 // indirect
 )
