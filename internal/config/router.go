@@ -5,28 +5,29 @@ import (
 
 	"github.com/bencoronard/demo-go-bff-web/internal/token"
 	xhttp "github.com/bencoronard/demo-go-common-libs/http"
+	echootel "github.com/labstack/echo-opentelemetry"
 	"github.com/labstack/echo/v5"
 	"github.com/labstack/echo/v5/middleware"
 )
 
 type router struct {
-	port int
-	e    *echo.Echo
-	h    *token.TokenHandler
+	p *Properties
+	e *echo.Echo
+	h *token.TokenHandler
 }
 
-func NewRouter(p *Properties, h *token.TokenHandler) xhttp.Router {
+func NewRouter(p *Properties, h *token.TokenHandler, eh xhttp.GlobalErrorHandler) xhttp.Router {
 	e := echo.New()
-	e.HTTPErrorHandler = xhttp.GlobalErrorHandler(nil)
+	e.HTTPErrorHandler = eh.GetHandler()
 	return &router{
-		port: p.Env.App.ListenPort,
-		e:    e,
-		h:    h,
+		p: p,
+		e: e,
+		h: h,
 	}
 }
 
 func (r *router) Port() int {
-	return r.port
+	return r.p.Env.App.ListenPort
 }
 
 func (r *router) Handler() http.Handler {
@@ -38,7 +39,10 @@ func (r *router) RegisterMiddlewares() {
 }
 
 func (r *router) RegisterRoutes() {
-	api := r.e.Group("/api", middleware.RequestLogger())
+	api := r.e.Group("/api",
+		echootel.NewMiddleware(r.p.Env.App.Name),
+		middleware.RequestLogger(),
+	)
 	api.GET("/token", r.h.GenerateToken)
 
 	act := r.e.Group("/actuator")

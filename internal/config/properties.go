@@ -18,7 +18,6 @@ type Properties struct {
 type envCfg struct {
 	App   appCfg
 	Vault vaultCfg
-	OTEL  otelCfg
 	CP    cpCfg
 }
 
@@ -56,6 +55,7 @@ func NewProperties(lc fx.Lifecycle) (*Properties, error) {
 }
 
 type appCfg struct {
+	Name        string `env:"APP_NAME"`
 	ListenPort  int    `env:"APP_LISTEN_PORT"`
 	Environment string `env:"APP_ENVIRONMENT"`
 }
@@ -63,14 +63,6 @@ type appCfg struct {
 type vaultCfg struct {
 	URI   string `env:"VAULT_URI"`
 	Token string `env:"VAULT_TOKEN"`
-}
-
-type otelCfg struct {
-	MetricsEndpoint           string  `env:"OTEL_COL_METRICS_ENDPOINT"`
-	TracesEndpoint            string  `env:"OTEL_COL_TRACES_ENDPOINT"`
-	LogsEndpoint              string  `env:"OTEL_COL_LOGS_ENDPOINT"`
-	MetricsSamplingFreqInMin  string  `env:"OTEL_METRICS_SAMPLING_FREQ_IN_MIN"`
-	TracesSamplingProbability float64 `env:"OTEL_TRACES_SAMPLING_PROBABILITY"`
 }
 
 type cpCfg struct {
