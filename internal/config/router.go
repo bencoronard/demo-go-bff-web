@@ -8,7 +8,15 @@ import (
 	echootel "github.com/labstack/echo-opentelemetry"
 	"github.com/labstack/echo/v5"
 	"github.com/labstack/echo/v5/middleware"
+	"go.uber.org/fx"
 )
+
+type RouterParams struct {
+	fx.In
+	p  *Properties
+	h  *token.TokenHandler
+	eh xhttp.GlobalErrorHandler
+}
 
 type router struct {
 	p *Properties
@@ -16,13 +24,13 @@ type router struct {
 	h *token.TokenHandler
 }
 
-func NewRouter(p *Properties, h *token.TokenHandler, eh xhttp.GlobalErrorHandler) xhttp.Router {
+func NewRouter(rp RouterParams) xhttp.Router {
 	e := echo.New()
-	e.HTTPErrorHandler = eh.GetHandler()
+	e.HTTPErrorHandler = rp.eh.GetHandler()
 	return &router{
-		p: p,
+		p: rp.p,
 		e: e,
-		h: h,
+		h: rp.h,
 	}
 }
 
@@ -46,6 +54,14 @@ func (r *router) RegisterRoutes() {
 	api.GET("/token", r.h.GenerateToken)
 
 	act := r.e.Group("/actuator")
-	act.GET("/health", func(c *echo.Context) error { return c.JSON(http.StatusOK, map[string]string{"status": "up"}) })
-	act.GET("/readiness", func(c *echo.Context) error { return c.JSON(http.StatusOK, map[string]string{"status": "ready"}) })
+	act.GET("/health", healthCheck)
+	act.GET("/readiness", readinessCheck)
+}
+
+func healthCheck(c *echo.Context) error {
+	return c.JSON(http.StatusOK, map[string]string{"status": "up"})
+}
+
+func readinessCheck(c *echo.Context) error {
+	return c.JSON(http.StatusOK, map[string]string{"status": "ready"})
 }
