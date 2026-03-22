@@ -5,7 +5,7 @@ go 1.26
 replace github.com/bencoronard/demo-go-common-libs => ../demo-go-common-libs
 
 require (
-	github.com/bencoronard/demo-go-common-libs v0.0.0-20260322063937-6f33b6aee867
+	github.com/bencoronard/demo-go-common-libs v0.0.0-20260322094436-55c8f0bbed48
 	github.com/caarlos0/env/v11 v11.4.0
 	github.com/labstack/echo/v5 v5.0.4
 	go.opentelemetry.io/contrib/bridges/otelslog v0.17.0
