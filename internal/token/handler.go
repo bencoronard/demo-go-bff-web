@@ -2,6 +2,7 @@ package token
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo/v5"
 )
@@ -15,9 +16,15 @@ func NewTokenHandler(s tokenService) *TokenHandler {
 }
 
 func (h *TokenHandler) GenerateToken(c *echo.Context) error {
-	token, err := h.s.issueToken(c.Request().Context())
+	id, err := strconv.ParseUint(c.Param("id"), 10, strconv.IntSize)
 	if err != nil {
 		return err
 	}
+
+	token, err := h.s.issueToken(c.Request().Context(), uint(id))
+	if err != nil {
+		return err
+	}
+
 	return c.String(http.StatusOK, token)
 }

@@ -2,7 +2,6 @@ package token
 
 import (
 	"context"
-	"math/rand/v2"
 	"strconv"
 	"time"
 
@@ -11,7 +10,7 @@ import (
 )
 
 type tokenService interface {
-	issueToken(ctx context.Context) (string, error)
+	issueToken(ctx context.Context, id uint) (string, error)
 }
 
 type tokenServiceImpl struct {
@@ -23,7 +22,7 @@ func NewTokenService(iss jwt.Issuer, pr permission.PermissionRepo) tokenService 
 	return &tokenServiceImpl{iss: iss, pr: pr}
 }
 
-func (t *tokenServiceImpl) issueToken(ctx context.Context) (string, error) {
+func (t *tokenServiceImpl) issueToken(ctx context.Context, id uint) (string, error) {
 	perms, err := t.pr.ListAllPermissions(ctx)
 	if err != nil {
 		return "", err
@@ -34,8 +33,5 @@ func (t *tokenServiceImpl) issueToken(ctx context.Context) (string, error) {
 		claims[p.Permission] = p.ID
 	}
 
-	min, max := 10, 50
-	id := rand.IntN(max-min) + min
-
-	return t.iss.IssueToken(strconv.Itoa(id), nil, claims, 600*time.Second, time.Time{})
+	return t.iss.IssueToken(strconv.FormatUint(uint64(id), 10), nil, claims, 600*time.Second, time.Time{})
 }
