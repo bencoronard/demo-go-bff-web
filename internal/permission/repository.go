@@ -10,15 +10,15 @@ type PermissionRepo interface {
 	ListAllPermissions(ctx context.Context) ([]Permission, error)
 }
 
-type permissionRepoImpl struct {
+type permissionRepo struct {
 	db *gorm.DB
 }
 
 func NewPermissionRepo(db *gorm.DB) PermissionRepo {
-	return &permissionRepoImpl{db: db}
+	return &permissionRepo{db: db}
 }
 
-func (p *permissionRepoImpl) ListAllPermissions(ctx context.Context) ([]Permission, error) {
+func (p *permissionRepo) ListAllPermissions(ctx context.Context) ([]Permission, error) {
 	var perms []Permission
 	if err := p.db.Find(&perms).Error; err != nil {
 		return []Permission{}, nil

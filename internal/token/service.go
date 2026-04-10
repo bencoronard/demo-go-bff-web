@@ -9,20 +9,20 @@ import (
 	"github.com/bencoronard/demo-go-common-libs/jwt"
 )
 
-type tokenService interface {
-	issueToken(ctx context.Context, id uint) (string, error)
+type TokenService interface {
+	issueToken(ctx context.Context, id uint, ttl time.Duration) (string, error)
 }
 
-type tokenServiceImpl struct {
+type tokenService struct {
 	iss jwt.Issuer
 	pr  permission.PermissionRepo
 }
 
-func NewTokenService(iss jwt.Issuer, pr permission.PermissionRepo) tokenService {
-	return &tokenServiceImpl{iss: iss, pr: pr}
+func NewTokenService(iss jwt.Issuer, pr permission.PermissionRepo) TokenService {
+	return &tokenService{iss: iss, pr: pr}
 }
 
-func (t *tokenServiceImpl) issueToken(ctx context.Context, id uint) (string, error) {
+func (t *tokenService) issueToken(ctx context.Context, id uint, ttl time.Duration) (string, error) {
 	perms, err := t.pr.ListAllPermissions(ctx)
 	if err != nil {
 		return "", err
@@ -33,5 +33,5 @@ func (t *tokenServiceImpl) issueToken(ctx context.Context, id uint) (string, err
 		claims[p.Permission] = p.ID
 	}
 
-	return t.iss.IssueToken(strconv.FormatUint(uint64(id), 10), nil, claims, 600*time.Second, time.Time{})
+	return t.iss.IssueToken(strconv.FormatUint(uint64(id), 10), nil, claims, ttl, time.Time{})
 }
