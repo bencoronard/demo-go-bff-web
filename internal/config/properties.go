@@ -1,20 +1,16 @@
 package config
 
 import (
+	"context"
+	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/bencoronard/demo-go-common-libs/rdb"
+	"github.com/bencoronard/demo-go-common-libs/vault"
 	"github.com/caarlos0/env/v11"
 	"go.uber.org/fx"
 )
-
-type pgDriverCfg struct {
-	Host string `mapstructure:"pg.host"`
-	Port string `mapstructure:"pg.port"`
-	Db   string `mapstructure:"pg.dbname"`
-	User string `mapstructure:"pg.user"`
-	Pass string `mapstructure:"pg.pass"`
-}
 
 type rdbCfg struct {
 	MaxOpenConns  int `env:"RDB_CONN_MAX_OPEN"`
@@ -23,19 +19,32 @@ type rdbCfg struct {
 	IdleTimeoutMs int `env:"RDB_CONN_IDLE_TIMEOUT_MSEC"`
 }
 
-type Properties struct {
-	fx.Out
-	PgCfg  *rdb.DriverConfig
-	RdbCfg *rdb.DBConfig
+type pgCfg struct {
+	Host string `mapstructure:"pg.host"`
+	Port string `mapstructure:"pg.port"`
+	Db   string `mapstructure:"pg.dbname"`
+	User string `mapstructure:"pg.user"`
+	Pass string `mapstructure:"pg.pass"`
 }
 
-func NewProperties() (Properties, error) {
-	pg, err := newPGConfig()
+type Properties struct {
+	fx.Out
+	RdbCfg *rdb.DBConfig
+	PgCfg  *rdb.DriverConfig
+}
+
+type PropParams struct {
+	fx.In
+	Vc vault.Client
+}
+
+func NewProperties(p PropParams) (Properties, error) {
+	rdb, err := newRdbCfg()
 	if err != nil {
 		return Properties{}, err
 	}
 
-	rdb, err := newRDBConfig()
+	pg, err := newPgCfg(p.Vc)
 	if err != nil {
 		return Properties{}, err
 	}
@@ -46,11 +55,31 @@ func NewProperties() (Properties, error) {
 	}, nil
 }
 
-func newPGConfig() (*rdb.DriverConfig, error) {
-	return &rdb.DriverConfig{}, nil
+func newPgCfg(vc vault.Client) (*rdb.DriverConfig, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	var c pgCfg
+	if err := vc.ReadSecret(ctx, fmt.Sprintf("secret/application/%s", "dev"), &c); err != nil {
+		return nil, err
+	}
+
+	port, err := strconv.Atoi(c.Port)
+	if err != nil {
+		return nil, err
+	}
+
+	return &rdb.DriverConfig{
+		Host:     c.Host,
+		Port:     port,
+		User:     c.User,
+		Password: c.Pass,
+		DBName:   c.Db,
+		UseSSL:   false,
+	}, nil
 }
 
-func newRDBConfig() (*rdb.DBConfig, error) {
+func newRdbCfg() (*rdb.DBConfig, error) {
 	var cfg rdbCfg
 	if err := env.Parse(&cfg); err != nil {
 		return nil, err
