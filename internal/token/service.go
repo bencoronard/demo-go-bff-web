@@ -10,7 +10,7 @@ import (
 )
 
 type TokenService interface {
-	issueToken(ctx context.Context, id uint, ttl time.Duration) (string, error)
+	IssueToken(ctx context.Context, id uint, ttl time.Duration) (string, error)
 }
 
 type tokenService struct {
@@ -22,7 +22,7 @@ func NewTokenService(iss jwt.Issuer, pr permission.PermissionRepo) TokenService 
 	return &tokenService{iss: iss, pr: pr}
 }
 
-func (t *tokenService) issueToken(ctx context.Context, id uint, ttl time.Duration) (string, error) {
+func (t *tokenService) IssueToken(ctx context.Context, id uint, ttl time.Duration) (string, error) {
 	perms, err := t.pr.ListAllPermissions(ctx)
 	if err != nil {
 		return "", err

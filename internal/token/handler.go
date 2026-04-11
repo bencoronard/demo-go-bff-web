@@ -17,17 +17,26 @@ func NewTokenHandler(s TokenService) *TokenHandler {
 }
 
 func (h *TokenHandler) GenerateToken(c *echo.Context) error {
-	id, err := strconv.ParseUint(c.Param("id"), 10, strconv.IntSize)
+	dto := issueTokenDTO{
+		Id:  c.Param("id"),
+		Ttl: c.Param("ttl"),
+	}
+
+	if err := c.Validate(&dto); err != nil {
+		return err
+	}
+
+	id, err := strconv.ParseUint(dto.Id, 10, strconv.IntSize)
 	if err != nil {
 		return err
 	}
 
-	sec, err := strconv.ParseUint(c.Param("ttl"), 10, strconv.IntSize)
+	ttl, err := strconv.ParseUint(dto.Ttl, 10, strconv.IntSize)
 	if err != nil {
 		return err
 	}
 
-	token, err := h.s.issueToken(c.Request().Context(), uint(id), time.Duration(sec)*time.Second)
+	token, err := h.s.IssueToken(c.Request().Context(), uint(id), time.Duration(ttl)*time.Second)
 	if err != nil {
 		return err
 	}
