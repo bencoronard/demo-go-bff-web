@@ -29,8 +29,8 @@ type pgCfg struct {
 
 type properties struct {
 	fx.Out
-	Rdb *rdb.DbConfig
-	Pg  *rdb.DriverConfig
+	Rdb rdb.DbConfig
+	Pg  rdb.DriverConfig
 }
 
 type propParams struct {
@@ -55,21 +55,21 @@ func NewProperties(p propParams) (properties, error) {
 	}, nil
 }
 
-func newPgCfg(vc vault.Client) (*rdb.DriverConfig, error) {
+func newPgCfg(vc vault.Client) (rdb.DriverConfig, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	var c pgCfg
 	if err := vc.ReadSecret(ctx, fmt.Sprintf("secret/application/%s", "local"), &c); err != nil {
-		return nil, err
+		return rdb.DriverConfig{}, err
 	}
 
 	port, err := strconv.Atoi(c.Port)
 	if err != nil {
-		return nil, err
+		return rdb.DriverConfig{}, err
 	}
 
-	return &rdb.DriverConfig{
+	return rdb.DriverConfig{
 		Host:     c.Host,
 		Port:     port,
 		User:     c.User,
@@ -79,12 +79,12 @@ func newPgCfg(vc vault.Client) (*rdb.DriverConfig, error) {
 	}, nil
 }
 
-func newRdbCfg() (*rdb.DbConfig, error) {
+func newRdbCfg() (rdb.DbConfig, error) {
 	var cfg rdbCfg
 	if err := env.Parse(&cfg); err != nil {
-		return nil, err
+		return rdb.DbConfig{}, err
 	}
-	return &rdb.DbConfig{
+	return rdb.DbConfig{
 		MaxOpenConns: cfg.MaxOpenConn,
 		MaxIdleConns: cfg.MaxIdleConn,
 		ConnTTL:      time.Duration(cfg.ConnTTL) * time.Millisecond,
