@@ -4,11 +4,12 @@ import (
 	"log/slog"
 
 	"github.com/bencoronard/demo-go-bff-web/internal/config"
+	"github.com/bencoronard/demo-go-bff-web/internal/permission"
+	"github.com/bencoronard/demo-go-bff-web/internal/token"
 	"github.com/bencoronard/demo-go-common-libs/jwt"
 	"github.com/bencoronard/demo-go-common-libs/rdb"
 	"github.com/bencoronard/demo-go-common-libs/vault"
 	"go.uber.org/fx"
-	"gorm.io/gorm"
 )
 
 func main() {
@@ -26,7 +27,12 @@ func main() {
 		fx.Provide(
 			jwt.NewAsymmIssuer,
 		),
-		fx.Invoke(func(db *gorm.DB, jwt jwt.Issuer) {
+		fx.Provide(
+			permission.NewPermissionRepo,
+			token.NewTokenService,
+			token.NewTokenHandler,
+		),
+		fx.Invoke(func(h *token.TokenHandler) {
 			slog.Info("Application started")
 		}),
 	).Run()
