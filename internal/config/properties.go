@@ -13,45 +13,45 @@ import (
 )
 
 type rdbCfg struct {
-	MaxOpenConns  int `env:"RDB_CONN_MAX_OPEN"`
-	MaxIdleConns  int `env:"RDB_CONN_MAX_IDLE"`
-	ConnMaxTTLMs  int `env:"RDB_CONN_MAX_TTL_MSEC"`
-	IdleTimeoutMs int `env:"RDB_CONN_IDLE_TIMEOUT_MSEC"`
+	MaxOpenConn int `env:"RDB_CONN_MAX_OPEN"`
+	MaxIdleConn int `env:"RDB_CONN_MAX_IDLE"`
+	ConnTTL     int `env:"RDB_CONN_TTL_MILLISEC"`
+	IdleTimeout int `env:"RDB_CONN_IDLE_TIMEOUT_MILLISEC"`
 }
 
 type pgCfg struct {
 	Host string `mapstructure:"pg.host"`
 	Port string `mapstructure:"pg.port"`
-	Db   string `mapstructure:"pg.dbname"`
+	DB   string `mapstructure:"pg.dbname"`
 	User string `mapstructure:"pg.user"`
 	Pass string `mapstructure:"pg.pass"`
 }
 
-type Properties struct {
+type properties struct {
 	fx.Out
-	RdbCfg *rdb.DBConfig
-	PgCfg  *rdb.DriverConfig
+	Rdb *rdb.DbConfig
+	Pg  *rdb.DriverConfig
 }
 
-type PropParams struct {
+type propParams struct {
 	fx.In
 	Vc vault.Client
 }
 
-func NewProperties(p PropParams) (Properties, error) {
+func NewProperties(p propParams) (properties, error) {
 	rdb, err := newRdbCfg()
 	if err != nil {
-		return Properties{}, err
+		return properties{}, err
 	}
 
 	pg, err := newPgCfg(p.Vc)
 	if err != nil {
-		return Properties{}, err
+		return properties{}, err
 	}
 
-	return Properties{
-		PgCfg:  pg,
-		RdbCfg: rdb,
+	return properties{
+		Pg:  pg,
+		Rdb: rdb,
 	}, nil
 }
 
@@ -60,7 +60,7 @@ func newPgCfg(vc vault.Client) (*rdb.DriverConfig, error) {
 	defer cancel()
 
 	var c pgCfg
-	if err := vc.ReadSecret(ctx, fmt.Sprintf("secret/application/%s", "dev"), &c); err != nil {
+	if err := vc.ReadSecret(ctx, fmt.Sprintf("secret/application/%s", "local"), &c); err != nil {
 		return nil, err
 	}
 
@@ -74,20 +74,20 @@ func newPgCfg(vc vault.Client) (*rdb.DriverConfig, error) {
 		Port:     port,
 		User:     c.User,
 		Password: c.Pass,
-		DBName:   c.Db,
+		DBName:   c.DB,
 		UseSSL:   false,
 	}, nil
 }
 
-func newRdbCfg() (*rdb.DBConfig, error) {
+func newRdbCfg() (*rdb.DbConfig, error) {
 	var cfg rdbCfg
 	if err := env.Parse(&cfg); err != nil {
 		return nil, err
 	}
-	return &rdb.DBConfig{
-		MaxOpenConns: cfg.MaxOpenConns,
-		MaxIdleConns: cfg.MaxIdleConns,
-		ConnMaxTTL:   time.Duration(cfg.ConnMaxTTLMs) * time.Millisecond,
-		IdleTimeout:  time.Duration(cfg.IdleTimeoutMs) * time.Millisecond,
+	return &rdb.DbConfig{
+		MaxOpenConns: cfg.MaxOpenConn,
+		MaxIdleConns: cfg.MaxIdleConn,
+		ConnTTL:      time.Duration(cfg.ConnTTL) * time.Millisecond,
+		IdleTimeout:  time.Duration(cfg.IdleTimeout) * time.Millisecond,
 	}, nil
 }
