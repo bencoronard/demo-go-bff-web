@@ -2,10 +2,15 @@ package config
 
 import (
 	"context"
+	"crypto/rsa"
+	"crypto/x509"
+	"encoding/pem"
+	"errors"
 	"fmt"
 	"strconv"
 	"time"
 
+	"github.com/bencoronard/demo-go-common-libs/jwt"
 	"github.com/bencoronard/demo-go-common-libs/rdb"
 	"github.com/bencoronard/demo-go-common-libs/vault"
 	"github.com/caarlos0/env/v11"
@@ -27,10 +32,16 @@ type pgCfg struct {
 	Pass string `mapstructure:"pg.pass"`
 }
 
+type jwtCfg struct {
+	Issuer string `env:"APP_NAME"`
+	Key    string `mapstructure:"private.key"`
+}
+
 type properties struct {
 	fx.Out
 	Rdb rdb.DbConfig
 	Pg  rdb.DriverConfig
+	Jwt jwt.AsymmIssuerConfig
 }
 
 type propParams struct {
@@ -49,9 +60,15 @@ func NewProperties(p propParams) (properties, error) {
 		return properties{}, err
 	}
 
+	jwt, err := newJwtIssuerCfg(p.Vc)
+	if err != nil {
+		return properties{}, err
+	}
+
 	return properties{
 		Pg:  pg,
 		Rdb: rdb,
+		Jwt: jwt,
 	}, nil
 }
 
@@ -89,5 +106,38 @@ func newRdbCfg() (rdb.DbConfig, error) {
 		MaxIdleConns: cfg.MaxIdleConn,
 		ConnTTL:      time.Duration(cfg.ConnTTL) * time.Millisecond,
 		IdleTimeout:  time.Duration(cfg.IdleTimeout) * time.Millisecond,
+	}, nil
+}
+
+func newJwtIssuerCfg(vc vault.Client) (jwt.AsymmIssuerConfig, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	var c jwtCfg
+	if err := env.Parse(&c); err != nil {
+		return jwt.AsymmIssuerConfig{}, err
+	}
+	if err := vc.ReadSecret(ctx, "secret/bff-web", &c); err != nil {
+		return jwt.AsymmIssuerConfig{}, err
+	}
+
+	block, _ := pem.Decode([]byte(c.Key))
+	if block == nil {
+		return jwt.AsymmIssuerConfig{}, errors.New("failed to parse private key")
+	}
+
+	key, err := x509.ParsePKCS8PrivateKey(block.Bytes)
+	if err != nil {
+		return jwt.AsymmIssuerConfig{}, err
+	}
+
+	rsaKey, ok := key.(*rsa.PrivateKey)
+	if !ok {
+		return jwt.AsymmIssuerConfig{}, errors.New("not an RSA private key")
+	}
+
+	return jwt.AsymmIssuerConfig{
+		Issuer: c.Issuer,
+		Key:    rsaKey,
 	}, nil
 }

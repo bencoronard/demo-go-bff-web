@@ -4,6 +4,7 @@ import (
 	"log/slog"
 
 	"github.com/bencoronard/demo-go-bff-web/internal/config"
+	"github.com/bencoronard/demo-go-common-libs/jwt"
 	"github.com/bencoronard/demo-go-common-libs/rdb"
 	"github.com/bencoronard/demo-go-common-libs/vault"
 	"go.uber.org/fx"
@@ -22,8 +23,11 @@ func main() {
 			rdb.NewPgDriver,
 			rdb.NewDb,
 		),
-		fx.Invoke(func(db *gorm.DB) {
-			slog.Info("application started")
+		fx.Provide(
+			jwt.NewAsymmIssuer,
+		),
+		fx.Invoke(func(db *gorm.DB, jwt jwt.Issuer) {
+			slog.Info("Application started")
 		}),
 	).Run()
 }
