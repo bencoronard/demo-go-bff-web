@@ -18,8 +18,8 @@ func NewTokenHandler(s TokenService) *TokenHandler {
 
 func (h *TokenHandler) GenerateToken(c *echo.Context) error {
 	dto := issueTokenDTO{
-		Id:  c.Param("id"),
-		Ttl: c.Param("ttl"),
+		Id:  c.QueryParam("id"),
+		Ttl: c.QueryParam("ttl"),
 	}
 
 	if err := c.Validate(&dto); err != nil {
