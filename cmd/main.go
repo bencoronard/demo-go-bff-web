@@ -27,7 +27,6 @@ func main() {
 		fx.Provide(
 			rdb.NewPgDriver,
 			rdb.NewDb,
-			rdb.NewTransactionManager,
 			fx.Annotate(
 				rdb.NewDbHealthChecker,
 				fx.ResultTags(`group:"healthcheck"`),
