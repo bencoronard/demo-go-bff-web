@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/bencoronard/demo-go-common-libs/actuator"
 	"github.com/bencoronard/demo-go-common-libs/jwt"
 	"github.com/bencoronard/demo-go-common-libs/rdb"
 	"github.com/bencoronard/demo-go-common-libs/vault"
@@ -37,11 +38,17 @@ type jwtCfg struct {
 	Key    string `mapstructure:"private.key"`
 }
 
+type actuatorCfg struct {
+	HealthCheckInterval int `env:"HEALTHCHECK_INTERVAL_SEC"`
+	HealthCheckTimeout  int `env:"HEALTHCHECK_TIMEOUT_SEC"`
+}
+
 type properties struct {
 	fx.Out
 	Rdb rdb.DbConfig
 	Pg  rdb.DriverConfig
 	Jwt jwt.AsymmIssuerConfig
+	Act actuator.Config
 }
 
 type propParams struct {
@@ -65,10 +72,16 @@ func NewProperties(p propParams) (properties, error) {
 		return properties{}, err
 	}
 
+	act, err := newActuatorCfg()
+	if err != nil {
+		return properties{}, err
+	}
+
 	return properties{
 		Pg:  pg,
 		Rdb: rdb,
 		Jwt: jwt,
+		Act: act,
 	}, nil
 }
 
@@ -97,15 +110,15 @@ func newPgCfg(vc vault.Client) (rdb.DriverConfig, error) {
 }
 
 func newRdbCfg() (rdb.DbConfig, error) {
-	var cfg rdbCfg
-	if err := env.Parse(&cfg); err != nil {
+	var c rdbCfg
+	if err := env.Parse(&c); err != nil {
 		return rdb.DbConfig{}, err
 	}
 	return rdb.DbConfig{
-		MaxOpenConns: cfg.MaxOpenConn,
-		MaxIdleConns: cfg.MaxIdleConn,
-		ConnTTL:      time.Duration(cfg.ConnTTL) * time.Millisecond,
-		IdleTimeout:  time.Duration(cfg.IdleTimeout) * time.Millisecond,
+		MaxOpenConns: c.MaxOpenConn,
+		MaxIdleConns: c.MaxIdleConn,
+		ConnTTL:      time.Duration(c.ConnTTL) * time.Millisecond,
+		IdleTimeout:  time.Duration(c.IdleTimeout) * time.Millisecond,
 	}, nil
 }
 
@@ -139,5 +152,16 @@ func newJwtIssuerCfg(vc vault.Client) (jwt.AsymmIssuerConfig, error) {
 	return jwt.AsymmIssuerConfig{
 		Issuer: c.Issuer,
 		Key:    rsaKey,
+	}, nil
+}
+
+func newActuatorCfg() (actuator.Config, error) {
+	var c actuatorCfg
+	if err := env.Parse(&c); err != nil {
+		return actuator.Config{}, err
+	}
+	return actuator.Config{
+		HealthCheckInterval: time.Duration(c.HealthCheckInterval) * time.Second,
+		HealthCheckTimeout:  time.Duration(c.HealthCheckTimeout) * time.Second,
 	}, nil
 }

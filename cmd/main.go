@@ -1,11 +1,10 @@
 package main
 
 import (
-	"log/slog"
-
 	"github.com/bencoronard/demo-go-bff-web/internal/config"
 	"github.com/bencoronard/demo-go-bff-web/internal/permission"
 	"github.com/bencoronard/demo-go-bff-web/internal/token"
+	"github.com/bencoronard/demo-go-common-libs/actuator"
 	"github.com/bencoronard/demo-go-common-libs/jwt"
 	"github.com/bencoronard/demo-go-common-libs/otel"
 	"github.com/bencoronard/demo-go-common-libs/rdb"
@@ -26,6 +25,11 @@ func main() {
 		fx.Provide(
 			rdb.NewPgDriver,
 			rdb.NewDb,
+			rdb.NewTransactionManager,
+			fx.Annotate(
+				rdb.NewDbHealthChecker,
+				fx.ResultTags(`group:"healthcheck"`),
+			),
 		),
 		fx.Provide(
 			jwt.NewAsymmIssuer,
@@ -43,8 +47,14 @@ func main() {
 			otel.NewMeterProvider,
 			otel.NewLoggerProvider,
 		),
-		fx.Invoke(func(h *token.TokenHandler, m *metric.MeterProvider) {
-			slog.Info("Application started")
+		fx.Provide(
+			actuator.New,
+		),
+		fx.Invoke(func(
+			h *token.TokenHandler,
+			m *metric.MeterProvider,
+			a actuator.Actuator,
+		) {
 		}),
 	).Run()
 }
