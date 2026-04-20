@@ -5,11 +5,13 @@ import (
 	"github.com/bencoronard/demo-go-bff-web/internal/permission"
 	"github.com/bencoronard/demo-go-bff-web/internal/token"
 	"github.com/bencoronard/demo-go-common-libs/actuator"
+	"github.com/bencoronard/demo-go-common-libs/http"
 	"github.com/bencoronard/demo-go-common-libs/jwt"
 	"github.com/bencoronard/demo-go-common-libs/otel"
 	"github.com/bencoronard/demo-go-common-libs/rdb"
 	"github.com/bencoronard/demo-go-common-libs/validator"
 	"github.com/bencoronard/demo-go-common-libs/vault"
+	"github.com/labstack/echo/v5"
 	"go.opentelemetry.io/otel/sdk/metric"
 	"go.uber.org/fx"
 )
@@ -50,10 +52,15 @@ func main() {
 		fx.Provide(
 			actuator.New,
 		),
+		fx.Provide(
+			http.NewGlobalErrorHandler,
+			http.NewEchoRouter,
+		),
 		fx.Invoke(func(
 			h *token.TokenHandler,
 			m *metric.MeterProvider,
 			a actuator.Actuator,
+			e *echo.Echo,
 		) {
 		}),
 	).Run()
