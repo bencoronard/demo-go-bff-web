@@ -8,6 +8,7 @@ import (
 	"github.com/bencoronard/demo-go-bff-web/internal/token"
 	"github.com/bencoronard/demo-go-common-libs/jwt"
 	"github.com/bencoronard/demo-go-common-libs/rdb"
+	"github.com/bencoronard/demo-go-common-libs/validator"
 	"github.com/bencoronard/demo-go-common-libs/vault"
 	"go.uber.org/fx"
 )
@@ -26,6 +27,7 @@ func main() {
 		),
 		fx.Provide(
 			jwt.NewAsymmIssuer,
+			validator.New,
 		),
 		fx.Provide(
 			permission.NewPermissionRepo,
