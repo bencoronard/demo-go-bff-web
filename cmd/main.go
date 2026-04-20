@@ -7,9 +7,11 @@ import (
 	"github.com/bencoronard/demo-go-bff-web/internal/permission"
 	"github.com/bencoronard/demo-go-bff-web/internal/token"
 	"github.com/bencoronard/demo-go-common-libs/jwt"
+	"github.com/bencoronard/demo-go-common-libs/otel"
 	"github.com/bencoronard/demo-go-common-libs/rdb"
 	"github.com/bencoronard/demo-go-common-libs/validator"
 	"github.com/bencoronard/demo-go-common-libs/vault"
+	"go.opentelemetry.io/otel/sdk/metric"
 	"go.uber.org/fx"
 )
 
@@ -34,7 +36,14 @@ func main() {
 			token.NewTokenService,
 			token.NewTokenHandler,
 		),
-		fx.Invoke(func(h *token.TokenHandler) {
+		fx.Provide(
+			otel.NewResource,
+			otel.NewPropagator,
+			otel.NewTracerProvider,
+			otel.NewMeterProvider,
+			otel.NewLoggerProvider,
+		),
+		fx.Invoke(func(h *token.TokenHandler, m *metric.MeterProvider) {
 			slog.Info("Application started")
 		}),
 	).Run()
