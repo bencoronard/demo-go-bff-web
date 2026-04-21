@@ -9,10 +9,9 @@ import (
 	"github.com/bencoronard/demo-go-common-libs/jwt"
 	"github.com/bencoronard/demo-go-common-libs/otel"
 	"github.com/bencoronard/demo-go-common-libs/rdb"
+	"github.com/bencoronard/demo-go-common-libs/server"
 	"github.com/bencoronard/demo-go-common-libs/validator"
 	"github.com/bencoronard/demo-go-common-libs/vault"
-	"github.com/labstack/echo/v5"
-	"go.opentelemetry.io/otel/sdk/metric"
 	"go.uber.org/fx"
 )
 
@@ -54,13 +53,8 @@ func main() {
 		fx.Provide(
 			http.NewGlobalErrorHandler,
 			http.NewEchoRouter,
+			config.NewHttpServer,
 		),
-		fx.Invoke(func(
-			h *token.TokenHandler,
-			m *metric.MeterProvider,
-			a actuator.Actuator,
-			e *echo.Echo,
-		) {
-		}),
+		fx.Invoke(server.ServeHttp),
 	).Run()
 }

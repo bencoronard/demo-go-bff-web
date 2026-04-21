@@ -8,7 +8,6 @@ require (
 	github.com/bencoronard/demo-go-common-libs v0.0.0-20260419121737-33c0a4eaf5e3
 	github.com/caarlos0/env/v11 v11.4.0
 	github.com/labstack/echo/v5 v5.1.0
-	go.opentelemetry.io/otel/sdk/metric v1.43.0
 	go.uber.org/fx v1.24.0
 	gorm.io/gorm v1.31.1
 )
@@ -57,6 +56,7 @@ require (
 	go.opentelemetry.io/otel/metric v1.43.0 // indirect
 	go.opentelemetry.io/otel/sdk v1.43.0 // indirect
 	go.opentelemetry.io/otel/sdk/log v0.19.0 // indirect
+	go.opentelemetry.io/otel/sdk/metric v1.43.0 // indirect
 	go.opentelemetry.io/otel/trace v1.43.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.10.0 // indirect
 	go.uber.org/dig v1.19.0 // indirect
