@@ -12,23 +12,21 @@ import (
 )
 
 type httpServer struct {
-	e *echo.Echo
-	a actuator.Actuator
-	h *token.TokenHandler
+	s  *http.Server
+	e  *echo.Echo
+	a  actuator.Actuator
+	th *token.TokenHandler
 }
 
 func (h *httpServer) Instance() *http.Server {
-	return &http.Server{
-		Addr:    ":8080",
-		Handler: h.e,
-	}
+	return h.s
 }
 
 func (h *httpServer) Configure() error {
 	h.e.Use(middleware.Recover())
 
 	api := h.e.Group("/api/tokens")
-	api.GET("", h.h.GenerateToken)
+	api.GET("", h.th.GenerateToken)
 
 	act := h.e.Group("/actuator")
 	act.GET("/liveness", func(c *echo.Context) error {
@@ -56,8 +54,12 @@ type httpServerParams struct {
 
 func NewHttpServer(p httpServerParams) server.HttpServer {
 	return &httpServer{
-		e: p.Router,
-		a: p.Actuator,
-		h: p.Handler,
+		s: &http.Server{
+			Addr:    ":8080",
+			Handler: p.Router,
+		},
+		e:  p.Router,
+		a:  p.Actuator,
+		th: p.Handler,
 	}
 }
