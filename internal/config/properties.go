@@ -7,7 +7,6 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
-	"strconv"
 	"time"
 
 	"github.com/bencoronard/demo-go-common-libs/actuator"
@@ -27,7 +26,7 @@ type rdbCfg struct {
 
 type pgCfg struct {
 	Host string `mapstructure:"pg.host"`
-	Port string `mapstructure:"pg.port"`
+	Port int    `mapstructure:"pg.port"`
 	DB   string `mapstructure:"pg.dbname"`
 	User string `mapstructure:"pg.user"`
 	Pass string `mapstructure:"pg.pass"`
@@ -94,14 +93,9 @@ func newPgCfg(vc vault.Client) (rdb.DriverConfig, error) {
 		return rdb.DriverConfig{}, err
 	}
 
-	port, err := strconv.Atoi(c.Port)
-	if err != nil {
-		return rdb.DriverConfig{}, err
-	}
-
 	return rdb.DriverConfig{
 		Host:     c.Host,
-		Port:     port,
+		Port:     c.Port,
 		User:     c.User,
 		Password: c.Pass,
 		DBName:   c.DB,
