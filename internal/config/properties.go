@@ -12,6 +12,7 @@ import (
 	"github.com/bencoronard/demo-go-common-libs/actuator"
 	"github.com/bencoronard/demo-go-common-libs/jwt"
 	"github.com/bencoronard/demo-go-common-libs/rdb"
+	"github.com/bencoronard/demo-go-common-libs/server"
 	"github.com/bencoronard/demo-go-common-libs/vault"
 	"github.com/caarlos0/env/v11"
 	"go.uber.org/fx"
@@ -20,8 +21,8 @@ import (
 type rdbCfg struct {
 	MaxOpenConn int `env:"RDB_CONN_MAX_OPEN"`
 	MaxIdleConn int `env:"RDB_CONN_MAX_IDLE"`
-	ConnTTL     int `env:"RDB_CONN_TTL_MILLISEC"`
-	IdleTimeout int `env:"RDB_CONN_IDLE_TIMEOUT_MILLISEC"`
+	ConnTTL     int `env:"RDB_CONN_TTL_SEC"`
+	IdleTimeout int `env:"RDB_CONN_IDLE_TIMEOUT_SEC"`
 }
 
 type pgCfg struct {
@@ -42,12 +43,23 @@ type actuatorCfg struct {
 	HealthCheckTimeout  int `env:"HEALTHCHECK_TIMEOUT_SEC"`
 }
 
+type serverCfg struct {
+	Host              string `env:"BIND_HOST"`
+	Port              int    `env:"BIND_PORT"`
+	ReadTimeout       int    `env:"SERVER_READ_TIMEOUT_SEC"`
+	ReadHeaderTimeout int    `env:"SERVER_READ_HEADER_TIMEOUT_SEC"`
+	WriteTimeout      int    `env:"SERVER_WRITE_TIMEOUT_SEC"`
+	IdleTimeout       int    `env:"SERVER_IDLE_TIMEOUT_SEC"`
+	MaxHeaderBytes    int    `env:"SERVER_MAX_HEADER_BYTES"`
+}
+
 type properties struct {
 	fx.Out
 	Rdb rdb.DbConfig
 	Pg  rdb.DriverConfig
 	Jwt jwt.AsymmIssuerConfig
 	Act actuator.Config
+	Srv server.HttpServerConfig
 }
 
 type propParams struct {
@@ -76,11 +88,17 @@ func NewProperties(p propParams) (properties, error) {
 		return properties{}, err
 	}
 
+	srv, err := newServerCfg()
+	if err != nil {
+		return properties{}, err
+	}
+
 	return properties{
 		Pg:  pg,
 		Rdb: rdb,
 		Jwt: jwt,
 		Act: act,
+		Srv: srv,
 	}, nil
 }
 
@@ -157,5 +175,21 @@ func newActuatorCfg() (actuator.Config, error) {
 	return actuator.Config{
 		HealthCheckInterval: time.Duration(c.HealthCheckInterval) * time.Second,
 		HealthCheckTimeout:  time.Duration(c.HealthCheckTimeout) * time.Second,
+	}, nil
+}
+
+func newServerCfg() (server.HttpServerConfig, error) {
+	var c serverCfg
+	if err := env.Parse(&c); err != nil {
+		return server.HttpServerConfig{}, err
+	}
+	return server.HttpServerConfig{
+		Host:              c.Host,
+		Port:              c.Port,
+		ReadTimeout:       time.Duration(c.ReadTimeout) * time.Second,
+		ReadHeaderTimeout: time.Duration(c.ReadHeaderTimeout) * time.Second,
+		WriteTimeout:      time.Duration(c.WriteTimeout) * time.Second,
+		IdleTimeout:       time.Duration(c.IdleTimeout) * time.Second,
+		MaxHeaderBytes:    c.MaxHeaderBytes,
 	}, nil
 }

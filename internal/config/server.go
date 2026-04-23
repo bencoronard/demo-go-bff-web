@@ -1,7 +1,9 @@
 package config
 
 import (
+	"net"
 	"net/http"
+	"strconv"
 
 	"github.com/bencoronard/demo-go-bff-web/internal/token"
 	"github.com/bencoronard/demo-go-common-libs/actuator"
@@ -50,13 +52,19 @@ type httpServerParams struct {
 	Router   *echo.Echo
 	Actuator actuator.Actuator
 	Handler  *token.TokenHandler
+	Prop     server.HttpServerConfig
 }
 
 func NewHttpServer(p httpServerParams) server.HttpServer {
 	return &httpServer{
 		s: &http.Server{
-			Addr:    ":8080",
-			Handler: p.Router,
+			Addr:              net.JoinHostPort(p.Prop.Host, strconv.Itoa(p.Prop.Port)),
+			Handler:           p.Router,
+			ReadTimeout:       p.Prop.ReadTimeout,
+			ReadHeaderTimeout: p.Prop.ReadHeaderTimeout,
+			WriteTimeout:      p.Prop.WriteTimeout,
+			IdleTimeout:       p.Prop.IdleTimeout,
+			MaxHeaderBytes:    p.Prop.MaxHeaderBytes,
 		},
 		e:  p.Router,
 		a:  p.Actuator,
