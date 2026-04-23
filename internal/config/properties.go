@@ -129,8 +129,8 @@ func newRdbCfg() (rdb.DbConfig, error) {
 	return rdb.DbConfig{
 		MaxOpenConns: c.MaxOpenConn,
 		MaxIdleConns: c.MaxIdleConn,
-		ConnTTL:      time.Duration(c.ConnTTL) * time.Millisecond,
-		IdleTimeout:  time.Duration(c.IdleTimeout) * time.Millisecond,
+		ConnTTL:      time.Duration(c.ConnTTL) * time.Second,
+		IdleTimeout:  time.Duration(c.IdleTimeout) * time.Second,
 	}, nil
 }
 
