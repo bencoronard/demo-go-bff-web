@@ -34,18 +34,20 @@ type pgCfg struct {
 }
 
 type jwtCfg struct {
-	Issuer string `env:"APP_NAME"`
+	Issuer string `env:"SERVICE_NAME"`
 	Key    string `mapstructure:"private.key"`
 }
 
 type actuatorCfg struct {
-	HealthCheckInterval int `env:"HEALTHCHECK_INTERVAL_SEC"`
-	HealthCheckTimeout  int `env:"HEALTHCHECK_TIMEOUT_SEC"`
+	Host                string `env:"SERVER_BIND_HOST"`
+	Port                int    `env:"ACTUATOR_PORT"`
+	HealthCheckInterval int    `env:"ACTUATOR_HEALTHCHECK_INTERVAL_SEC"`
+	HealthCheckTimeout  int    `env:"ACTUATOR_HEALTHCHECK_TIMEOUT_SEC"`
 }
 
 type serverCfg struct {
-	Host              string `env:"BIND_HOST"`
-	Port              int    `env:"BIND_PORT"`
+	Host              string `env:"SERVER_BIND_HOST"`
+	Port              int    `env:"SERVER_BIND_PORT"`
 	ReadTimeout       int    `env:"SERVER_READ_TIMEOUT_SEC"`
 	ReadHeaderTimeout int    `env:"SERVER_READ_HEADER_TIMEOUT_SEC"`
 	WriteTimeout      int    `env:"SERVER_WRITE_TIMEOUT_SEC"`
