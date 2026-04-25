@@ -40,7 +40,7 @@ type jwtCfg struct {
 
 type actuatorCfg struct {
 	Host                string `env:"SERVER_BIND_HOST"`
-	Port                int    `env:"ACTUATOR_PORT"`
+	Port                int    `env:"ACTUATOR_BIND_PORT"`
 	HealthCheckInterval int    `env:"ACTUATOR_HEALTHCHECK_INTERVAL_SEC"`
 	HealthCheckTimeout  int    `env:"ACTUATOR_HEALTHCHECK_TIMEOUT_SEC"`
 }
@@ -175,6 +175,8 @@ func newActuatorCfg() (actuator.Config, error) {
 		return actuator.Config{}, err
 	}
 	return actuator.Config{
+		Host:                c.Host,
+		Port:                c.Port,
 		HealthCheckInterval: time.Duration(c.HealthCheckInterval) * time.Second,
 		HealthCheckTimeout:  time.Duration(c.HealthCheckTimeout) * time.Second,
 	}, nil
