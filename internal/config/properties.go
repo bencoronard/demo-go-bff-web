@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/bencoronard/demo-go-common-libs/actuator"
+	"github.com/bencoronard/demo-go-common-libs/http"
 	"github.com/bencoronard/demo-go-common-libs/jwt"
 	"github.com/bencoronard/demo-go-common-libs/rdb"
 	"github.com/bencoronard/demo-go-common-libs/server"
@@ -55,6 +56,11 @@ type serverCfg struct {
 	MaxHeaderBytes    int    `env:"SERVER_MAX_HEADER_BYTES"`
 }
 
+type routerCfg struct {
+	ContextPath     string `env:"SERVER_CONTEXT_PATH"`
+	EnableAccessLog bool   `env:"SERVER_ENABLE_ACCESS_LOG"`
+}
+
 type properties struct {
 	fx.Out
 	Rdb rdb.DbConfig
@@ -62,6 +68,7 @@ type properties struct {
 	Jwt jwt.AsymmIssuerConfig
 	Act actuator.Config
 	Srv server.HttpServerConfig
+	Rtr http.RouterConfig
 }
 
 type propParams struct {
@@ -95,12 +102,18 @@ func NewProperties(p propParams) (properties, error) {
 		return properties{}, err
 	}
 
+	rtr, err := newRouterCfg()
+	if err != nil {
+		return properties{}, err
+	}
+
 	return properties{
 		Pg:  pg,
 		Rdb: rdb,
 		Jwt: jwt,
 		Act: act,
 		Srv: srv,
+		Rtr: rtr,
 	}, nil
 }
 
@@ -195,5 +208,16 @@ func newServerCfg() (server.HttpServerConfig, error) {
 		WriteTimeout:      time.Duration(c.WriteTimeout) * time.Second,
 		IdleTimeout:       time.Duration(c.IdleTimeout) * time.Second,
 		MaxHeaderBytes:    c.MaxHeaderBytes,
+	}, nil
+}
+
+func newRouterCfg() (http.RouterConfig, error) {
+	var c routerCfg
+	if err := env.Parse(&c); err != nil {
+		return http.RouterConfig{}, nil
+	}
+	return http.RouterConfig{
+		ContextPath:     c.ContextPath,
+		EnableAccessLog: c.EnableAccessLog,
 	}, nil
 }
