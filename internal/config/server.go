@@ -7,9 +7,7 @@ import (
 
 	"github.com/bencoronard/demo-go-bff-web/internal/token"
 	"github.com/bencoronard/demo-go-common-libs/server"
-	echootel "github.com/labstack/echo-opentelemetry"
 	"github.com/labstack/echo/v5"
-	"github.com/labstack/echo/v5/middleware"
 	"go.uber.org/fx"
 )
 
@@ -24,13 +22,8 @@ func (h *httpServer) Instance() *http.Server {
 }
 
 func (h *httpServer) Configure() error {
-	h.e.Use(middleware.Recover())
-	h.e.Use(echootel.NewMiddleware(""))
-	h.e.Use(middleware.RequestLogger())
-
 	api := h.e.Group("/token")
 	api.GET("", h.th.GenerateToken)
-
 	return nil
 }
 

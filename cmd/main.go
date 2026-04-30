@@ -7,6 +7,7 @@ import (
 	"github.com/bencoronard/demo-go-common-libs/actuator"
 	"github.com/bencoronard/demo-go-common-libs/http"
 	"github.com/bencoronard/demo-go-common-libs/jwt"
+	"github.com/bencoronard/demo-go-common-libs/logger"
 	"github.com/bencoronard/demo-go-common-libs/otel"
 	"github.com/bencoronard/demo-go-common-libs/rdb"
 	"github.com/bencoronard/demo-go-common-libs/server"
@@ -18,6 +19,7 @@ import (
 func main() {
 	fx.New(
 		fx.Provide(
+			logger.NewOtelLogger,
 			vault.NewClient,
 		),
 		fx.Provide(
@@ -48,13 +50,13 @@ func main() {
 			otel.NewLoggerProvider,
 		),
 		fx.Provide(
-			actuator.New,
-		),
-		fx.Provide(
 			http.NewGlobalErrorHandler,
 			http.NewEchoRouter,
 			config.NewHttpServer,
 		),
-		fx.Invoke(server.ServeHttp),
+		fx.Invoke(
+			actuator.New,
+			server.ServeHttp,
+		),
 	).Run()
 }
