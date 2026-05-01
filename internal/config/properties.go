@@ -57,8 +57,7 @@ type serverCfg struct {
 }
 
 type routerCfg struct {
-	ContextPath     string `env:"SERVER_CONTEXT_PATH"`
-	EnableAccessLog bool   `env:"SERVER_ENABLE_ACCESS_LOG"`
+	EnableAccessLog bool `env:"SERVER_ENABLE_ACCESS_LOG"`
 }
 
 type properties struct {
@@ -68,7 +67,7 @@ type properties struct {
 	Jwt jwt.AsymmIssuerConfig
 	Act actuator.Config
 	Srv server.HttpServerConfig
-	Rtr http.RouterConfig
+	Rtr http.Config
 }
 
 type propParams struct {
@@ -211,13 +210,12 @@ func newServerCfg() (server.HttpServerConfig, error) {
 	}, nil
 }
 
-func newRouterCfg() (http.RouterConfig, error) {
+func newRouterCfg() (http.Config, error) {
 	var c routerCfg
 	if err := env.Parse(&c); err != nil {
-		return http.RouterConfig{}, nil
+		return http.Config{}, nil
 	}
-	return http.RouterConfig{
-		ContextPath:     c.ContextPath,
+	return http.Config{
 		EnableAccessLog: c.EnableAccessLog,
 	}, nil
 }
