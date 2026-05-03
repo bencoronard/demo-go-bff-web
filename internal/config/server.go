@@ -31,10 +31,10 @@ type httpServerParams struct {
 	fx.In
 	Router  *echo.Echo
 	Handler *token.TokenHandler
-	Prop    server.HttpServerConfig
+	Prop    server.HTTPServerConfig
 }
 
-func NewHttpServer(p httpServerParams) server.HttpServer {
+func NewHttpServer(p httpServerParams) server.HTTPServer {
 	return &httpServer{
 		s: &http.Server{
 			Addr:              net.JoinHostPort(p.Prop.Host, strconv.Itoa(p.Prop.Port)),

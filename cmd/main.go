@@ -19,7 +19,7 @@ import (
 func main() {
 	fx.New(
 		fx.Provide(
-			logger.NewOtelLogger,
+			logger.NewStdOutLogger,
 			vault.NewClient,
 		),
 		fx.Provide(
@@ -27,9 +27,9 @@ func main() {
 		),
 		fx.Provide(
 			rdb.NewPgDriver,
-			rdb.NewDb,
+			rdb.NewDB,
 			fx.Annotate(
-				rdb.NewDbHealthChecker,
+				rdb.NewHealthChecker,
 				fx.ResultTags(`group:"healthcheck"`),
 			),
 		),
@@ -56,7 +56,7 @@ func main() {
 		),
 		fx.Invoke(
 			actuator.New,
-			server.ServeHttp,
+			server.ServeHTTP,
 		),
 	).Run()
 }

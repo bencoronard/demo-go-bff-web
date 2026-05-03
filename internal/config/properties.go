@@ -62,11 +62,11 @@ type routerCfg struct {
 
 type properties struct {
 	fx.Out
-	Rdb rdb.DbConfig
+	Rdb rdb.DBConfig
 	Pg  rdb.DriverConfig
 	Jwt jwt.AsymmIssuerConfig
 	Act actuator.Config
-	Srv server.HttpServerConfig
+	Srv server.HTTPServerConfig
 	Rtr http.Config
 }
 
@@ -135,12 +135,12 @@ func newPgCfg(vc vault.Client) (rdb.DriverConfig, error) {
 	}, nil
 }
 
-func newRdbCfg() (rdb.DbConfig, error) {
+func newRdbCfg() (rdb.DBConfig, error) {
 	var c rdbCfg
 	if err := env.Parse(&c); err != nil {
-		return rdb.DbConfig{}, err
+		return rdb.DBConfig{}, err
 	}
-	return rdb.DbConfig{
+	return rdb.DBConfig{
 		MaxOpenConns: c.MaxOpenConn,
 		MaxIdleConns: c.MaxIdleConn,
 		ConnTTL:      time.Duration(c.ConnTTL) * time.Second,
@@ -194,12 +194,12 @@ func newActuatorCfg() (actuator.Config, error) {
 	}, nil
 }
 
-func newServerCfg() (server.HttpServerConfig, error) {
+func newServerCfg() (server.HTTPServerConfig, error) {
 	var c serverCfg
 	if err := env.Parse(&c); err != nil {
-		return server.HttpServerConfig{}, err
+		return server.HTTPServerConfig{}, err
 	}
-	return server.HttpServerConfig{
+	return server.HTTPServerConfig{
 		Host:              c.Host,
 		Port:              c.Port,
 		ReadTimeout:       time.Duration(c.ReadTimeout) * time.Second,
