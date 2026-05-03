@@ -19,7 +19,7 @@ import (
 func main() {
 	fx.New(
 		fx.Provide(
-			logger.NewStdOutLogger,
+			logger.NewOtelLogger,
 			vault.NewClient,
 		),
 		fx.Provide(
